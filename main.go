@@ -1,11 +1,16 @@
 package main
 
 import (
+	"embed"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/codeengio/idi/cmd"
 	"github.com/codeengio/idi/generator"
 	"github.com/spf13/cobra"
 )
+
+//go:embed all:templates
+var templateFS embed.FS
 
 func main() {
 	rootCmd := cmd.NewRootCmd(runNewApp)
@@ -28,7 +33,7 @@ func runNewApp(cmd *cobra.Command, args []string) error {
 		".gitignore":             "templates/gitignore.tmpl",
 		".env":                   "templates/env.tmpl",
 	}
-	p := tea.NewProgram(generator.NewAppInitialModel(templates))
+	p := tea.NewProgram(generator.NewAppInitialModel(templates, templateFS))
 	if _, err := p.Run(); err != nil {
 		return err
 	}

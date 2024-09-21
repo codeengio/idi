@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"embed"
 	"fmt"
 	"log/slog"
 
@@ -24,10 +25,11 @@ type model struct {
 	appName      string
 	moduleName   string
 	templatesMap map[string]string
+	templateFS   embed.FS
 	err          error
 }
 
-func NewAppInitialModel(templatesMap map[string]string) model {
+func NewAppInitialModel(templatesMap map[string]string, templateFS embed.FS) model {
 	ti := textinput.New()
 	ti.Placeholder = "my-app"
 	ti.Focus()
@@ -38,6 +40,7 @@ func NewAppInitialModel(templatesMap map[string]string) model {
 		title:        newAppTitle,
 		textInput:    ti,
 		templatesMap: templatesMap,
+		templateFS:   templateFS,
 		err:          nil,
 	}
 }
@@ -102,6 +105,7 @@ func (m model) WriteAllFiles() error {
 			m.appName,
 			templatePath,
 			fileName,
+			m.templateFS,
 			map[string]string{"AppName": m.appName, "ModuleName": m.moduleName},
 		)
 		if err != nil {

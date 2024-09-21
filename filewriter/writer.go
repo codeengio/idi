@@ -1,6 +1,7 @@
 package filewriter
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"log/slog"
@@ -8,8 +9,8 @@ import (
 	"path/filepath"
 )
 
-func WriteFile(appName, templateName, fileName string, args map[string]string) error {
-	tmpl, err := template.ParseFiles(templateName)
+func WriteFile(appName, templateName, fileName string, templateFS embed.FS, args map[string]string) error {
+	tmpl, err := template.ParseFS(templateFS, templateName)
 	if err != nil {
 		slog.Error(err.Error())
 		return err
