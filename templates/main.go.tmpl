@@ -1,0 +1,22 @@
+package main
+
+import (
+	"os"
+
+	"example.com/module/app/config"
+	"example.com/module/app/internal/api"
+	"github.com/rs/zerolog"
+)
+
+func main() {
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
+	appConfig, err := config.GetAppConfig(".env", logger)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("unable to get app config")
+	}
+
+	err = api.InitRouter(appConfig, logger)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("unable to initialize router")
+	}
+}

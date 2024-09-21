@@ -1,0 +1,48 @@
+package api
+
+import (
+	"strconv"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/rs/zerolog"
+
+	"{{.ModuleName}}/config"
+)
+
+var corsConfig = middleware.CORSConfig{
+	AllowOrigins: []string{"*"},
+	AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE, echo.PATCH},
+	AllowHeaders: []string{
+		echo.HeaderOrigin,
+		echo.HeaderContentType,
+		echo.HeaderAccept,
+		echo.HeaderAuthorization,
+	},
+	AllowCredentials: true,
+}
+
+func InitRouter(cfg *config.AppConfig, logger zerolog.Logger) error {
+	e := echo.New()
+	e.Use(middleware.CORS())
+	e.Use(middleware.CORSWithConfig(corsConfig))
+	e.Use(middleware.RequestLoggerWithConfig(corsSettings(logger)))
+
+	return e.Start(":" + strconv.Itoa(cfg.AppPort))
+}
+
+func corsSettings(logger zerolog.Logger) middleware.RequestLoggerConfig {
+	return middleware.RequestLoggerConfig{
+		LogURI:    true,
+		LogStatus: true,
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			logger.Info().
+				Str("URI", v.URI).
+				Int("status", v.Status).
+				Int64("latency ms", v.Latency.Milliseconds()).
+				Msg("request")
+
+			return nil
+		},
+	}
+}

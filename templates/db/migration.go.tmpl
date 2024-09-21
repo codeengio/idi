@@ -1,0 +1,19 @@
+package db
+
+import (
+	"database/sql"
+	"embed"
+
+	"github.com/pressly/goose/v3"
+)
+
+func RunMigrations(sqlDb *sql.DB, embedMigrations embed.FS, dir string) error {
+	goose.SetBaseFS(embedMigrations)
+	if err := goose.SetDialect("postgres"); err != nil {
+		return err
+	}
+	if err := goose.Up(sqlDb, dir, goose.WithAllowMissing()); err != nil {
+		return err
+	}
+	return nil
+}

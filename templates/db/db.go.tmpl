@@ -1,0 +1,48 @@
+package db
+
+import (
+	"context"
+	"embed"
+	"fmt"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
+
+	"{{.ModuleName}}/config"
+)
+
+//go:embed all:migrations/*.sql
+var migrations embed.FS
+
+var connectionPoolExpiry = 15 * time.Second
+
+func GetPGDBPool(cfg *config.AppConfig, migrate bool) (*pgxpool.Pool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), connectionPoolExpiry)
+	defer cancel()
+
+	pool, err := pgxpool.New(
+		ctx,
+		fmt.Sprintf(
+			"postgres://%s:%s@%s:%d/%s",
+			cfg.DbUser,
+			cfg.DbPassword,
+			cfg.DbHost,
+			cfg.DbPort,
+			cfg.DbName,
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if migrate {
+		sqlDb := stdlib.OpenDBFromPool(pool)
+		err = RunMigrations(sqlDb, migrations, "migrations")
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return pool, nil
+}
