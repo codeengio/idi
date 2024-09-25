@@ -11,12 +11,13 @@ import (
 var k = koanf.New(".")
 
 type AppConfig struct {
-	AppPort       int    `koanf:"PORT"`
-	DbHost        string `koanf:"DB_HOST"`
-	DbPort        int    `koanf:"DB_PORT"`
-	DbUser        string `koanf:"DB_USER"`
-	DbPassword    string `koanf:"DB_PASSWORD"`
-	DbName        string `koanf:"DB_NAME"`
+	AppPort    int    `koanf:"PORT"`
+	DbHost     string `koanf:"DB_HOST"`
+	DbPort     int    `koanf:"DB_PORT"`
+	DbUser     string `koanf:"DB_USER"`
+	DbPassword string `koanf:"DB_PASSWORD"`
+	DbName     string `koanf:"DB_NAME"`
+	HankoUrl   string `koanf:"HANKO_URL"`
 }
 
 func GetAppConfig(configFile string, logger zerolog.Logger) (config *AppConfig, err error) {

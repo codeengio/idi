@@ -3,9 +3,7 @@
 ## Use it
 
 ```bash
-$ idi new
+$ idi new myapp example.com/module/myapp
 ```
-
-and type the name of your app and Go module
 
 Go into your generated app and execute `go mod tidy`

@@ -2,10 +2,12 @@ package main
 
 import (
 	"embed"
+	"os"
+	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/codeengio/idi/cmd"
 	"github.com/codeengio/idi/generator"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -13,11 +15,20 @@ import (
 var templateFS embed.FS
 
 func main() {
-	rootCmd := cmd.NewRootCmd(runNewApp)
-	rootCmd.Execute()
+	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	log := zerolog.New(output).With().Timestamp().Logger()
+
+	rootCmd := cmd.NewRootCmd(runNewApp(log))
+	rootCmd.PersistentFlags().StringP("name", "n", "", "app name")
+	rootCmd.PersistentFlags().StringP("module", "m", "", "Go module name (example.com/module/app)")
+
+	err := rootCmd.Execute()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to execute the command")
+	}
 }
 
-func runNewApp(cmd *cobra.Command, args []string) error {
+func runNewApp(logger zerolog.Logger) func(*cobra.Command, []string) error {
 	templates := map[string]string{
 		"README.md":              "templates/readme.md.tmpl",
 		"main.go":                "templates/main.go.tmpl",
@@ -32,11 +43,27 @@ func runNewApp(cmd *cobra.Command, args []string) error {
 		"Makefile":               "templates/makefile.tmpl",
 		".gitignore":             "templates/gitignore.tmpl",
 		".env":                   "templates/env.tmpl",
-	}
-	p := tea.NewProgram(generator.NewAppInitialModel(templates, templateFS))
-	if _, err := p.Run(); err != nil {
-		return err
+		"pkg/hanko/auth.go":      "templates/pkg/hanko/auth.go.tmpl",
 	}
 
-	return nil
+	return func(cmd *cobra.Command, args []string) error {
+		name, err := cmd.Flags().GetString("name")
+		if err != nil {
+			return err
+		}
+
+		module, err := cmd.Flags().GetString("module")
+		if err != nil {
+			return err
+		}
+
+		appGen := generator.App{Logger: logger}
+		err = appGen.GenerateNew(name, module, templates, templateFS)
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to generate new app")
+			return err
+		}
+
+		return nil
+	}
 }

@@ -15,9 +15,10 @@ func NewRootCmd(run func(cmd *cobra.Command, args []string) error) *cobra.Comman
 	return &cobra.Command{
 		Use:   "new",
 		Short: "Creates a new app",
+		Long:  `Creates a new app`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errors.New("requires at least one arg")
+				return errors.New("requires 'new' arg")
 			}
 
 			if !slices.Contains(allowedArgs, args[0]) {
@@ -27,7 +28,10 @@ func NewRootCmd(run func(cmd *cobra.Command, args []string) error) *cobra.Comman
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			run(cmd, args)
+			err := run(cmd, args)
+			if err != nil {
+				return
+			}
 		},
 	}
 }

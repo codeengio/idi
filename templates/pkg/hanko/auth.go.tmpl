@@ -1,0 +1,50 @@
+package hanko
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"strings"
+
+	"{{.ModuleName}}/config"
+	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/rs/zerolog"
+)
+
+type Authorizer struct {
+	logger zerolog.Logger
+	config config.AppConfig
+}
+
+func NewAuthorizer(logger zerolog.Logger, config config.AppConfig) *Authorizer {
+	return &Authorizer{logger: logger, config: config}
+}
+
+func (h *Authorizer) SessionMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			authorization := c.Request().Header.Get("Authorization")
+			content := strings.Split(authorization, " ")
+			if len(content) != 2 {
+				return echo.NewHTTPError(http.StatusUnauthorized)
+			}
+			set, err := jwk.Fetch(
+				context.Background(),
+				fmt.Sprintf("%v/.well-known/jwks.json", h.config.HankoUrl),
+			)
+			if err != nil {
+				return err
+			}
+
+			token, err := jwt.Parse([]byte(content[1]), jwt.WithKeySet(set))
+			if err != nil {
+				return echo.NewHTTPError(http.StatusUnauthorized)
+			}
+
+			c.Set("claims", token.PrivateClaims())
+			return next(c)
+		}
+	}
+}

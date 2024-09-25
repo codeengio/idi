@@ -3,6 +3,8 @@ package api
 import (
 	"strconv"
 
+	"{{.ModuleName}}/pkg/hanko"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
@@ -27,6 +29,7 @@ func InitRouter(cfg *config.AppConfig, logger zerolog.Logger) error {
 	e.Use(middleware.CORS())
 	e.Use(middleware.CORSWithConfig(corsConfig))
 	e.Use(middleware.RequestLoggerWithConfig(corsSettings(logger)))
+	_ = hanko.NewAuthorizer(logger, *cfg)
 
 	return e.Start(":" + strconv.Itoa(cfg.AppPort))
 }
