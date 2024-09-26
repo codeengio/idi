@@ -1,20 +1,25 @@
 package generator
 
 import (
-	"embed"
+	"io/fs"
 
-	"github.com/codeengio/idi/filewriter"
+	"github.com/codeengio/idi/writer"
 	"github.com/rs/zerolog"
 )
 
 type App struct {
-	Logger zerolog.Logger
+	logger zerolog.Logger
+	writer writer.Writer
 }
 
-func (f *App) GenerateNew(name, goModule string, templatesMap map[string]string, templateFS embed.FS) error {
+func NewApp(logger zerolog.Logger, w writer.Writer) *App {
+	return &App{logger: logger, writer: w}
+}
+
+func (f *App) GenerateNew(name, goModule string, templatesMap map[string]string, templateFS fs.FS) error {
 	for fileName, templatePath := range templatesMap {
-		f.Logger.Info().Str("create", fileName).Msg("generating file")
-		err := filewriter.WriteFile(
+		f.logger.Info().Str("create", fileName).Msg("generating file")
+		err := f.writer.WriteTemplate(
 			name,
 			templatePath,
 			fileName,

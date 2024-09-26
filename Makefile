@@ -1,6 +1,6 @@
 APP=idi
 MODULE := github.com/codeengio/idi
-VERSION := v0.1
+VERSION := 1.0.0
 
 .PHONY: clean bin test
 

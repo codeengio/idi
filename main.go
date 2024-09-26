@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"github.com/codeengio/idi/writer"
 	"os"
 	"time"
 
@@ -57,7 +58,7 @@ func runNewApp(logger zerolog.Logger) func(*cobra.Command, []string) error {
 			return err
 		}
 
-		appGen := generator.App{Logger: logger}
+		appGen := generator.NewApp(logger, writer.NewFS(logger))
 		err = appGen.GenerateNew(name, module, templates, templateFS)
 		if err != nil {
 			logger.Error().Err(err).Msg("failed to generate new app")

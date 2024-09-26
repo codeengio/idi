@@ -1,0 +1,4 @@
+packages:
+  github.com/codeengio/idi/writer:
+    config:
+      all: True
