@@ -1,5 +1,5 @@
 # IDI
-[![Coverage](https://img.shields.io/badge/Coverage-0.0%25-red)](https://github.com/codeengio/idi/actions/workflows/gocover.yaml)
+[![Coverage](https://img.shields.io/badge/Coverage-32.1%25-yellow)](https://github.com/codeengio/idi/actions/workflows/gocover.yaml)
 
 ## Use it
 
