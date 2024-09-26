@@ -3,3 +3,4 @@ release
 .vscode
 .idea
 out
+.DS_Store
